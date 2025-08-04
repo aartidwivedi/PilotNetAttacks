@@ -52,9 +52,9 @@ class Network(nn.Module):
 
 if __name__ == "__main__":
 
-    path_to_frames = r"C:\Users\Deborshi Chakrabarti\Desktop\try" 
-    model_path = r'C:\Users\Deborshi Chakrabarti\Desktop\lava-dl-main\tutorials\lava\lib\dl\slayer\pilotnet\Trained\network.pt'
-    results_path = r'C:\Users\Deborshi Chakrabarti\Desktop\New folder\pilotnet_sdnn\results.txt' # Path to your ground truth file
+    path_to_frames = r"/home/aartikumari/Desktop/Attack1000" 
+    model_path = r'/home/aartikumari/Desktop/lava-dl-main/tutorials/lava/lib/dl/slayer/pilotnet/Trained/network.pt'
+    results_path = r'/home/aartikumari/Desktop/lava-dl-main/tutorials/lava/lib/dl/netx/pilotnet_sdnn/results.txt' # Path to your ground truth file
 
     sequence_tensor = None
     try:
@@ -161,3 +161,17 @@ if __name__ == "__main__":
                 f.write(f"{image_name}\t{ground_truth}\t{original_pred}\t{adversarial_pred:.8f}\n")
                 
         print(f"\n Comparison results saved to '{output_filename}'")
+
+        # Save adversarial images
+        save_dir = "attack_results_pgd_txt"
+        os.makedirs(save_dir, exist_ok=True)
+        # Remove batch dimension and denormalize
+        adv_imgs = adversarial_input.squeeze(0)
+        for idx in range(adv_imgs.shape[3]):
+            img = adv_imgs[..., idx]
+            # Denormalize
+            img = img * 0.5 + 0.5
+            img = img.clamp(0, 1)
+            img_pil = transforms.ToPILImage()(img)
+            img_pil.save(os.path.join(save_dir, f"adv_{idx:04d}.png"))
+        print(f"Adversarial images saved to '{save_dir}'.")
